@@ -1,0 +1,114 @@
+apply plugin: 'com.android.application'
+
+// Comment this to disable Firebase Analytics or if you do not have the necessary
+// google-services.json file for Firebase.
+apply plugin: 'com.google.gms.google-services'
+
+// Addition flavors that we want to build for
+def additionalFlavorsFile = "flavors/flavors.gradle"
+
+android {
+    flavorDimensions "version"
+
+    productFlavors {
+        // This is the Rally Tactical Systems "reference" flavor
+        reference {
+            dimension "version"
+            applicationId "com.rallytac.engageandroid.reference"
+        }
+    }
+
+    // Add additional OEM flavors if any
+    try {
+        apply from: additionalFlavorsFile
+    }
+    catch (ignored) {
+    }
+
+    compileSdkVersion 29
+
+    defaultConfig {
+        // The default application ID will be overridden by the one
+        // defined in the product flavor
+        applicationId "com.rallytac.example.package"
+        minSdkVersion 21
+        targetSdkVersion 29
+        versionCode 1285
+        versionName "1285"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
+        android.defaultConfig.vectorDrawables.useSupportLibrary = true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def apkBaseName = variant.productFlavors.get(0).name
+            def SEP = "_"
+            def buildType = variant.buildType.name
+            def version = variant.versionCode
+            def newApkName = apkBaseName + SEP + version + SEP + buildType + ".apk"
+
+            outputFileName = new File(newApkName)
+        }
+    }
+}
+
+dependencies {
+    // Engage Engine - change this to use a particular version
+    def relType = 'release'
+    def engineVersion = '1.218.9056'
+
+    // From a binary repository such as Maven
+    // implementation 'com.rallytac.engage:engage-engine-release:' + engineVersion + '@aar'
+    
+    // From a local file tree - replace <path_to_the_aar_file> with a valid path in youe environment
+//    implementation fileTree(dir: '<path_to_the_aar_file>', include: ["engage-engine-" + relType + "-" + engineVersion + ".aar"])
+
+    // Copy from eng.
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation fileTree(dir: "libs", include: ["*.aar"])
+
+    // Android goodies
+    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'androidx.preference:preference:1.0.0'
+    implementation 'androidx.vectordrawable:vectordrawable:1.0.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+
+    // QR codes
+    implementation 'com.journeyapps:zxing-android-embedded:3.5.0'
+
+    // Google Maps
+    implementation 'com.google.android.gms:play-services-maps:16.1.0'
+    implementation 'com.google.android.gms:play-services-location:16.0.0'
+    implementation 'com.google.android.gms:play-services-maps:16.1.0'
+
+    // Charting
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+
+    // Testing
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
+
+    // Firebase
+    implementation 'com.google.firebase:firebase-analytics:17.2.2'
+    implementation 'com.google.firebase:firebase-core:17.2.3'
+
+    // JSON
+    implementation 'com.tzx.json:jsonhandleview:1.2.2'
+}
